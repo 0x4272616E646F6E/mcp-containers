@@ -27,10 +27,11 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate date tag
-        id: date-tag
+      - name: Generate date tag and lowercase owner
+        id: variables
         run: |
           echo "DATE_TAG=$(date +'%Y.%m')" >> $GITHUB_OUTPUT
+          echo "OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Build and push context7 image
         uses: docker/build-push-action@v5
@@ -38,8 +39,8 @@ jobs:
           context: ./context7
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/mcp-context7:latest
-            ghcr.io/${{ github.repository_owner }}/mcp-context7:${{ steps.date-tag.outputs.DATE_TAG }}
+            ghcr.io/${{ steps.variables.outputs.OWNER }}/mcp-context7:latest
+            ghcr.io/${{ steps.variables.outputs.OWNER }}/mcp-context7:${{ steps.variables.outputs.DATE_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -49,7 +50,7 @@ jobs:
           context: ./run-python
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/mcp-run-python:latest
-            ghcr.io/${{ github.repository_owner }}/mcp-run-python:${{ steps.date-tag.outputs.DATE_TAG }}
+            ghcr.io/${{ steps.variables.outputs.OWNER }}/mcp-run-python:latest
+            ghcr.io/${{ steps.variables.outputs.OWNER }}/mcp-run-python:${{ steps.variables.outputs.DATE_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
